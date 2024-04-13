@@ -1,6 +1,4 @@
 
-
-
 library(data.table)
 library(dplyr)
 library(glmnet)
@@ -10,8 +8,9 @@ library(tmle3)
 library(hal9001)
 
 rm(list = ls())
-source(".../uhal.R")
-
+source(paste0(here(), "/R/uhal.R"))
+source(paste0(here(), "/R/rhal.R"))
+source(paste0(here(), "/R/simu_helper.R"))
 
 # ----------------------------------------
 # Generate Original Data 
@@ -44,18 +43,25 @@ node_list <- list(
   Y = "Y"
 )
 
-lrnr_uhal <- Lrnr_uhal9001$new()
+sl_Q <- Lrnr_uhal9001$new()
+sl_g <- Lrnr_uhal9001$new()
 
-res_Qg <- fit_uhal_Qg(df = df, 
-                      y_type = "continuous", 
-                      covars = node_list$W)
+# sl_Q <- Lrnr_rhal9001$new()
+# sl_g <- Lrnr_rhal9001$new()
+
+res_Qg <- fit_sl_Qg(df = df, 
+                    sl_Q = sl_Q,
+                    sl_g = sl_g,
+                    y_type = "continuous", 
+                    covars = node_list$W)
+
 
 set.seed(123)
-df_syn <- generate_uhal_data(n = nrow(df), 
-                             df = df, 
-                             y_type = "continuous", 
-                             g_fit = res_Qg$g_fit, 
-                             Q_fit = res_Qg$Q_fit)
+df_syn <- generate_data(n = nrow(df), 
+                        df = df, 
+                        y_type = "continuous", 
+                        g_fit = res_Qg$g_fit, 
+                        Q_fit = res_Qg$Q_fit)
 
 
 # ----------------------------------------

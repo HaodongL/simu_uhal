@@ -5,7 +5,7 @@ library(hal9001)
 library(glmnet)
 
 rm(list = ls())
-source(paste0(here(), "/R/est_function/uhal.R"))
+source(paste0(here(), "/R/uhal.R"))
 
 
 # fit undersmoothed HAL
