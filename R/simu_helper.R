@@ -39,7 +39,7 @@ generate_data <- function(n = 500, df, y_type, g_fit, Q_fit){
 }
 
 
-fit_sl_Qg <- function(df, sl_Q, sl_g, y_type, covars){
+fit_Qg <- function(df, sl_Q, sl_g, y_type, covars){
   task_Q <- sl3_Task$new(
     data = df,
     covariates = c(covars, "A"),

@@ -166,34 +166,32 @@ fit_rhal <- function(X,
   args_f <- as.list(environment())
   hal_init <- do.call(relax_init,
                       args = args_f)
-  # do relaxed HAL
-  # return relaxed HAL fit
-  x_basis <- hal_init$fit_init$x_basis
-  nonzero_col <- hal_init$nonzero_col
   
-  # nonzero_basis <- hal_init$basis_mat
-  # if (length(family) > 1) {family <- family[1]}
-  # 
-  # if (family == "gaussian"){
-  #   family = gaussian()
-  # }else if (family == "binomial"){
-  #   family = binomial()
-  # }else if (family == "poisson"){
-  #   family = poisson()
-  # }
-  # rhal_fit <- glm.fit(x = nonzero_basis, y = Y, family = family)
+  # if empty model, skip refit and output init
+  if (dim(hal_init$basis_mat)[2] == 0) {
+    x_basis <- hal_init$fit_init$x_basis
+    coefs <- hal_init$fit_init$coefs
+    rhal_fit <- hal_init$fit_init
+  }else{
+    # do relaxed HAL
+    # return relaxed HAL fit
+    x_basis <- hal_init$fit_init$x_basis
+    nonzero_col <- hal_init$nonzero_col
+    
+    pf <- rep(Inf, ncol(x_basis))
+    pf[nonzero_col] <- 0
+    
+    rhal_fit <- glmnet(x_basis, 
+                       Y, 
+                       lambda = 1e-5,
+                       family = family, 
+                       standardize = FALSE, 
+                       penalty.factor  = pf)
+    
+    coefs <- stats::coef(rhal_fit)
+  }
   
-  pf <- rep(Inf, ncol(x_basis))
-  pf[nonzero_col] <- 0
   
-  rhal_fit <- glmnet(x_basis, 
-                     Y, 
-                     lambda = 1e-5,
-                     family = family, 
-                     standardize = FALSE, 
-                     penalty.factor  = pf)
-  
-  coefs <- stats::coef(rhal_fit)
   # print(paste0("L1 norm: ", sum(abs(coefs[-1]))))
   # print(paste0("zero: ", coefs[-nonzero_col]))
   # print(paste0("non-zero: ", coefs[nonzero_col]))

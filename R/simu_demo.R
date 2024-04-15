@@ -49,11 +49,11 @@ sl_g <- Lrnr_uhal9001$new()
 # sl_Q <- Lrnr_rhal9001$new()
 # sl_g <- Lrnr_rhal9001$new()
 
-res_Qg <- fit_sl_Qg(df = df, 
-                    sl_Q = sl_Q,
-                    sl_g = sl_g,
-                    y_type = "continuous", 
-                    covars = node_list$W)
+res_Qg <- fit_Qg(df = df, 
+                 sl_Q = sl_Q,
+                 sl_g = sl_g,
+                 y_type = "continuous", 
+                 covars = node_list$W)
 
 
 set.seed(123)
