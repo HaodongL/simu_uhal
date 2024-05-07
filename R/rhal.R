@@ -255,3 +255,83 @@ relax_init <- function(X, Y, ...) {
               "nonzero_col" = nonzero_col)
   return(res)
 }
+
+
+###############################################################################
+
+#' A default generator for the \code{num_knots} argument for each degree of
+#' interactions and the smoothness orders.
+#'
+#' @param d interaction degree.
+#' @param smoothness_orders see \code{\link{fit_hal}}.
+#' @param base_num_knots_0 The base number of knots for zeroth-order smoothness
+#'  basis functions. The number of knots by degree interaction decays as
+#'  `base_num_knots_0/2^(d-1)` where `d` is the interaction degree of the basis
+#'  function.
+#' @param base_num_knots_1 The base number of knots for 1 or greater order
+#'  smoothness basis functions. The number of knots by degree interaction
+#'  decays as `base_num_knots_1/2^(d-1)` where `d` is the interaction degree of
+#'  the basis function.
+#'
+#' @keywords internal
+
+num_knots_generator <- function(max_degree, smoothness_orders, base_num_knots_0 = 500,
+                                base_num_knots_1 = 200) {
+  if (all(smoothness_orders > 0)) {
+    return(sapply(seq_len(max_degree), function(d) {
+      round(base_num_knots_1 / 2^(d - 1))
+    }))
+  } else {
+    return(sapply(seq_len(max_degree), function(d) {
+      round(base_num_knots_0 / 2^(d - 1))
+    }))
+  }
+}
+
+
+################################################################################
+
+#' Call with filtered argument list
+#'
+#' Call a function with a list of arguments, eliminating any that aren't
+#' matched in the function prototype
+#'
+#' @param fun A \code{function} whose signature will be used to reduce the
+#' @param args A \code{list} of function arguments to use.
+#' @param other_valid A \code{list} of function arguments names that are valid,
+#'   but not formals of \code{fun}.
+#' @param keep_all A \code{logical} don't drop arguments, even if they aren't
+#'   matched in either the function prototype or other_valid.
+#' @param silent A \code{logical} indicating whether to pass \code{message}s
+#'  when arguments not found in \code{formals} are passed to \code{fun}.
+#' @param ignore A \code{character} vector indicating which arguments should be dropped
+#'
+#' @keywords internal
+call_with_args <- function(fun, args, other_valid = list(), keep_all = FALSE,
+                           silent = FALSE, ignore = c()) {
+  
+  # drop ignore args
+  args <- args[!(names(args) %in% ignore)]
+  if (!keep_all) {
+    # catch arguments to be kept
+    formal_args <- names(formals(fun))
+    all_valid <- c(formal_args, other_valid)
+    
+    # find invalid arguments based on combination of formals and other_valid
+    invalid <- names(args)[which(!(names(args) %in% all_valid))]
+    
+    # subset arguments to pass
+    args <- args[which(names(args) %in% all_valid)]
+    
+    # return warnings when dropping arguments
+    if (!silent & length(invalid) > 0) {
+      message(sprintf(
+        "Learner called function %s with unknown args: %s. These will be dropped.\nCheck the params supported by this learner.",
+        as.character(substitute(fun)), paste(invalid, collapse = ", ")
+      ))
+    }
+  }
+  do.call(fun, args)
+}
+
+

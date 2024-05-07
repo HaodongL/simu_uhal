@@ -10,7 +10,7 @@ source(paste0(here(), "/R/uhal.R"))
 
 # fit undersmoothed HAL
 lrnr_uhal <- Lrnr_uhal9001$new()
-
+lrnr_xgb <- Lrnr_xgboost$new()
 
 # load example data set
 data(cpp)
@@ -30,6 +30,12 @@ task <- sl3_Task$new(
 # stack learners into a model (including screeners and pipelines)
 uhal_fit <- lrnr_uhal$train(task)
 preds <- uhal_fit$predict()
+mean((preds - cpp$haz)^2)
+
+
+xgb_fit <- lrnr_xgb$train(task)
+xgb_preds <- xgb_fit$predict()
+mean((xgb_preds - cpp$haz)^2)
 
 
 

@@ -2,12 +2,17 @@
 # helper functions for simulation with uhal or rhal
 
 
-generate_data <- function(n = 500, df, y_type, g_fit, Q_fit){
+generate_data <- function(n = 500, df, y_type, g_fit, Q_fit, simu_data0 = NULL){
   
   #--- generate W ---#
   covars <- setdiff(names(df), c("A","Y"))
+  # if no pre-specified starting point, then
   # simulate W from the empirical distribution of W in the real data
-  simu_data <- dplyr::sample_n(df, size = n, replace = TRUE)
+  if (is.null(simu_data0)){
+    simu_data <- dplyr::sample_n(df, size = n, replace = TRUE)
+  }else{
+    simu_data <- simu_data0
+  }
   
   #--- generate A ---#
   task_a_predict <- make_sl3_Task(data = simu_data, covariates = covars,
